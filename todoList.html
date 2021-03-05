@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Todo List App</title>
+	<meta charset="utf-8">  
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100&display=swap" rel="stylesheet">
+	<style type="text/css">
+		.container{
+			position: absolute;
+			left: 43%;
+			font-family: 'Noto Sans JP', sans-serif;
+		}
+	</style>
+</head>
+<body onload="showTasks()">
+	<div class = "container">
+		<center><h1>Todo List</h1></center>
+		<div class = "addContainer">
+			<label>Add a task:</label><br>
+			<input type="text" placeholder = "I am going to..." name="addedItem" id = "addedItem">
+			<button style = "background-color: green" onclick = "add()" class = "plusButton">+</button>
+		</div><br>
+		<div class = "listContainer" id = "listContainer">
+			
+		</div>
+	</div>
+	<script type="text/javascript">
+		var root = document.getElementById("listContainer");
+		//add() adds a new entry to the local storage and adds it to the DOM
+		function add(){
+			var valueToBeAdded = document.getElementById("addedItem").value;
+			if (valueToBeAdded == ""){
+				alert("Enter something!");
+			}
+			else{
+				var key = 1;
+				//Until a key which is not already in the local storage, generate one randomly
+				while(localStorage.hasOwnProperty(key)){
+					key = Math.floor(Math.random()*1000000);
+				}
+				localStorage.setItem(key, valueToBeAdded);//The new key-value pair is added to the local storage
+				console.log(localStorage)
+				create(root, key);//An HTML element is created and added to the DOM displaying the new entry
+			}
+		}
+		//Create() function creates an HTML element and puts the data from localstorage based on key "i" and appends it to the "root" node
+		function create(root, i){
+			var currentItem = localStorage.getItem(i);//Task statement is retrieved from the local storage
+			console.log(currentItem);
+			//Para tag is created to hold the data
+			var div = document.createElement("DIV");
+			var pTag = document.createElement("P");
+			var node = document.createTextNode(currentItem);
+			pTag.appendChild(node);
+
+			//checkbox
+			var checkBox = document.createElement("INPUT");
+			checkBox.setAttribute("type", "checkbox");
+			div.appendChild(checkBox);
+
+			//pTag contains the task statement which is appended to the div element
+			div.appendChild(pTag);
+
+			//Delete button
+			var button = document.createElement("BUTTON");
+			button.innerHTML = "-";
+			div.appendChild(button);
+			button.style.position = "relative";
+			button.style.left = "80%";
+			button.style.backgroundColor = "red";
+			button.style.visibility = "hidden";
+
+			checkBox.addEventListener('change', function(e){
+				var parent = e.target.parentElement;
+				var children = parent.childNodes;
+				if(this.checked){
+					//this block gets executed when the box is checked
+					children[1].style.textDecoration = "line-through";
+					children[2].style.visibility = "visible";
+				}
+				else{
+					//this block gets executed when the box is unchecked
+					children[1].style.textDecoration = "none";
+					children[2].style.visibility = "hidden";
+				}
+			});//event listener listens for any change on the checkbox
+			button.addEventListener('click', function(e){
+				//console.log(e.target.parentElement);
+				var parent = e.target.parentElement;
+				var idToBeRemoved = parent.id;
+				localStorage.removeItem(idToBeRemoved);
+				var grandParent = parent.parentElement;
+				grandParent.removeChild(parent);
+			});// event listener listens on the delete button
+
+
+			var randomColor = Math.floor(Math.random()*16777215).toString(16);//random color for each task
+			randomColor = "#"+randomColor;
+			//console.log(randomColor);
+
+			//Styling the div element
+			div.style.background = randomColor;
+			div.style.borderStyle = "solid";
+			div.style.borderColor = randomColor;
+			div.style.borderRadius = "10%";
+			div.style.width = "90%";
+			div.style.padding = "5%";
+
+			div.id = i;//each div has unique id which is generated in the create() function
+
+			root.appendChild(div);//div element is added to the root which the "listContainer"
+			root.appendChild(document.createElement("BR"));
+		}
+		function showTasks(){
+			for (var i = 0; i< localStorage.length; i++)
+			{
+					//Iterating through each of the key-value pair in the localstorage
+					create(root,localStorage.key(i));
+			}
+		}
+	</script>
+</body>
+</html>
